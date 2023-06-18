@@ -1,7 +1,7 @@
 package prompt
 
 var defaultMatchers = []Matcher{
-	&FixedPrefixMatcher{"> ", "quote> "},
+	shellMatcher{},
 }
 
 // NewDefault returns a parser with the default matchers.
