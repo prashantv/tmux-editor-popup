@@ -52,7 +52,12 @@ func (o Opts) Run() error {
 	}
 
 	if o.UsePrompt {
-		p, err := o.findPrompt()
+		promptParser, err := prompt.NewAll()
+		if err != nil {
+			return fmt.Errorf("prompt parse config: %v", err)
+		}
+
+		p, err := o.findPrompt(promptParser)
 		if err == nil {
 			preEditContent := strings.Join(p.Parsed, "\n")
 			if p.IsLast {
@@ -61,7 +66,6 @@ func (o Opts) Run() error {
 
 			if err := os.WriteFile(file, []byte(preEditContent), 0o666); err != nil {
 				tmuxShowMessage("Failed to write prompt contents to file")
-
 			}
 
 		} else {
@@ -104,9 +108,7 @@ func (o Opts) Run() error {
 	return nil
 }
 
-func (o Opts) findPrompt() (*prompt.Prompt, error) {
-	promptParser := prompt.NewDefault()
-
+func (o Opts) findPrompt(promptParser *prompt.Parser) (*prompt.Prompt, error) {
 	var lastPrompt *prompt.Prompt
 	var lastPane []byte
 

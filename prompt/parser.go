@@ -3,6 +3,7 @@ package prompt
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"io"
 	"unicode"
 )
@@ -19,13 +20,6 @@ type Prompt struct {
 type Parser struct {
 	Matchers []Matcher
 }
-
-// func (p Parser) Find(capture func(int) io.Reader) (Prompt, error) {
-// 	const attempts = 10
-// 	for i := 0; i < attempts; i++ {
-// 		screen := capture(i)
-// 	}
-// }
 
 func (p Parser) Find(r io.Reader) (Prompt, error) {
 	m, totalLines, err := p.parse(r)
@@ -86,6 +80,7 @@ func (p *Parser) parse(r io.Reader) (_ *match, lines int, _ error) {
 
 		if current != nil {
 			parsed, ok := current.matcher.Continued(line, current.lines)
+			fmt.Printf("  and continued? %v on %q\n", ok, line)
 			if ok {
 				current.lines = append(current.lines, line)
 				current.parsed = append(current.parsed, parsed)
@@ -122,12 +117,13 @@ func (p *Parser) parse(r io.Reader) (_ *match, lines int, _ error) {
 }
 
 func (p *Parser) checkStartMatch(line string) (Matcher, string, bool) {
-	for _, m := range p.Matchers {
+	for i, m := range p.Matchers {
 		parsed, ok := m.Start(line)
 		if !ok {
 			continue
 		}
 
+		fmt.Printf("matcher %d started on %q\n", i, line)
 		return m, parsed, true
 	}
 
